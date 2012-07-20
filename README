@@ -1,0 +1,3 @@
+test.js is the websocket server, dependencies: node.js, node.io
+fun.html is the web page used to display clicker information, use in conjunction with test.js. Place websocket server url after ? after the url e.g. C:\fun.html?123.124.2.2
+PollingTest.java is the java code used to send clicker data to MQTT, use with libraries from turning point
