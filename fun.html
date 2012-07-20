@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js'></script>
+<script> var addr = window.location.href.slice(window.location.href.indexOf('?') + 1); </script>
+<script type="text/javascript" src="./d3.v2.js"></script>
+<link type="text/css" rel="stylesheet" href="styling.css"/>
+
+<script>
+histData = new Array();
+userValue = {};
+numAnswered = 0;
+start = 0;
+$("#temp").text(numAnswered.toString());
+histData = [0,0,0,0,0,0,0,0,0,0]; // starting dataset  
+function runScript() {
+	/* Create a websocket connection */ 
+	var socket = io.connect('http://' + addr); //io.connect('http://localhost:8124/');
+	/* Define websocket handlers */ 
+    socket.on('greet', function (data) {
+		//set the text value
+		if (start == 1) {
+			JSONData = JSON.parse(data.hello);
+			if (JSONData.id in userValue) {
+				histData[userValue[JSONData.id]] = histData[userValue[JSONData.id]] - 1;
+			} else {
+				numAnswered++;
+				$("#temp").text(numAnswered.toString());
+			}
+			userValue[JSONData.id] = JSONData.key;
+			histData[JSONData.key] = histData[JSONData.key] + 1;
+			redraw();
+		}
+	});
+}
+</script>
+
+
+<script type = 'text/javascript'>
+    $(document).ready(function() {
+	var url = window.location.href;
+	if(url.indexOf('?') == -1) {
+		document.write("Specify websocket url");
+	} else {
+/* Define handler for websocket debug information*/
+	function debug(str) {
+		$("#debug_txt").html("<p>"+str+"</p>");
+	};
+	$.getScript('http://' + addr + '/socket.io/socket.io.js', function() {
+		if (!(typeof(io.connect) == 'function') || io.connect == null) {
+			document.write("Cannot connect to server");
+		} else {
+		runScript();
+		}
+	});
+	//window.setTimeout(runScript, 800 );
+	}
+});
+</script>
+</head>
+<body>
+	    <div id="msg"><span id="temp" value = "0"></span></div>
+		<div id="chart"></div>
+		<script type="text/javascript" src="histogram.js"></script>
+		<div></div>
+		<input type="button" value="Start" id="button1" onclick ="timerWatch();"> 
+		<script type="text/javascript">
+		function timerWatch() {
+			if (start == 1) {
+				document.getElementById("button1").value="Start";
+				start = 0;
+			} else {
+				//Reset all values
+				histData = [0,0,0,0,0,0,0,0,0,0]; 
+				userValue = {};
+				numAnswered = 0;
+				redraw();
+				document.getElementById("button1").value="Stop";
+				start = 1;
+				
+			}
+		}
+		</script>
+</body>
+</html>
+	
